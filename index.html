@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CR Collection Level</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:   #f5c842;
+    --gold2:  #e8a820;
+    --red:    #e03030;
+    --blue:   #1a6fd4;
+    --dark:   #0a0d14;
+    --panel:  #111520;
+    --panel2: #181d2e;
+    --border: #2a3050;
+    --text:   #d8dff5;
+    --dim:    #7080a8;
+    --green:  #3ecf6a;
+    --purple: #9b6dff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(26,111,212,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(155,109,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 60% 20%, rgba(245,200,66,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Gem pattern overlay */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: repeating-linear-gradient(
+      45deg, transparent, transparent 40px,
+      rgba(255,255,255,0.008) 40px, rgba(255,255,255,0.008) 41px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────────────── */
+  header {
+    text-align: center;
+    padding: 3rem 0 2.5rem;
+  }
+
+  .crown {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 0 20px rgba(245,200,66,0.6));
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(245,200,66,0.4), 0 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 0.5rem;
+  }
+
+  /* ── Search ──────────────────────────────────────────────────────────────── */
+  .search-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .search-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .tag-input {
+    flex: 1;
+    min-width: 180px;
+    background: var(--dark);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 0.85rem 1.2rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .tag-input::placeholder { color: var(--dim); }
+  .tag-input:focus {
+    border-color: var(--gold2);
+    box-shadow: 0 0 0 3px rgba(245,200,66,0.12);
+  }
+
+  .btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.85rem 2rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+    color: #1a0e00;
+    box-shadow: 0 4px 16px rgba(245,200,66,0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245,200,66,0.45);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ── Loading ─────────────────────────────────────────────────────────────── */
+  .loading {
+    text-align: center;
+    padding: 3rem;
+    display: none;
+  }
+
+  .spinner {
+    width: 44px; height: 44px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading p {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  /* ── Error ───────────────────────────────────────────────────────────────── */
+  .error-box {
+    background: rgba(224,48,48,0.1);
+    border: 1px solid rgba(224,48,48,0.35);
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    color: #f88;
+    font-size: 0.95rem;
+    display: none;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── Results ─────────────────────────────────────────────────────────────── */
+  #results { display: none; }
+
+  /* Player hero card */
+  .player-hero {
+    background: linear-gradient(135deg, var(--panel) 0%, var(--panel2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .player-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(245,200,66,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .player-info { flex: 1; min-width: 200px; }
+
+  .player-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    line-height: 1.2;
+  }
+
+  .player-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    margin-top: 0.25rem;
+  }
+
+  .cl-display {
+    text-align: center;
+  }
+
+  .cl-number {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 40px rgba(245,200,66,0.5), 0 2px 4px rgba(0,0,0,0.8);
+    line-height: 1;
+  }
+
+  .cl-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 0.3rem;
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .stat-card:hover {
+    border-color: rgba(245,200,66,0.3);
+    transform: translateY(-2px);
+  }
+
+  .stat-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+
+  .stat-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 0.2rem;
+  }
+
+  /* Section header */
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Celebration tier */
+  .tier-card {
+    background: var(--panel);
+    border: 1px solid;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tier-card.current {
+    border-color: rgba(245,200,66,0.5);
+    background: linear-gradient(135deg, rgba(245,200,66,0.05) 0%, var(--panel) 100%);
+    box-shadow: 0 0 24px rgba(245,200,66,0.08);
+  }
+
+  .tier-card.next {
+    border-color: var(--border);
+    opacity: 0.8;
+  }
+
+  .tier-badge {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+
+  .tier-info { flex: 1; }
+
+  .tier-range {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 0.3rem;
+  }
+
+  .tier-rewards {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .tier-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+  }
+
+  .tier-tag.you-are-here {
+    background: rgba(245,200,66,0.2);
+    color: var(--gold);
+    border: 1px solid rgba(245,200,66,0.4);
+  }
+
+  .tier-tag.next-up {
+    background: rgba(120,140,200,0.12);
+    color: var(--dim);
+    border: 1px solid var(--border);
+  }
+
+  /* Milestone targets */
+  .milestone-list { display: flex; flex-direction: column; gap: 1rem; }
+
+  .milestone-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.5rem;
+  }
+
+  .milestone-item.reached {
+    border-color: rgba(62,207,106,0.4);
+    background: rgba(62,207,106,0.04);
+  }
+
+  .milestone-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .milestone-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.7rem;
+    border-radius: 100px;
+  }
+
+  .badge-green  { background: rgba(62,207,106,0.2);  color: var(--green);  border: 1px solid rgba(62,207,106,0.35); }
+  .badge-gold   { background: rgba(245,200,66,0.15); color: var(--gold);   border: 1px solid rgba(245,200,66,0.3); }
+  .badge-purple { background: rgba(155,109,255,0.15);color: var(--purple); border: 1px solid rgba(155,109,255,0.3); }
+
+  /* Progress bar */
+  .progress-wrap { margin-bottom: 0.5rem; }
+
+  .progress-track {
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--gold2), var(--gold));
+    box-shadow: 0 0 8px rgba(245,200,66,0.4);
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+    width: 0;
+  }
+
+  .progress-fill.reached-fill {
+    background: linear-gradient(90deg, #2ea854, var(--green));
+    box-shadow: 0 0 8px rgba(62,207,106,0.4);
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    color: var(--dim);
+    margin-top: 0.4rem;
+  }
+
+  /* Upgrade plan table */
+  .plan-toggle {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+  }
+
+  .plan-toggle:hover { opacity: 1; }
+
+  .plan-table-wrap {
+    display: none;
+    margin-top: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.88rem;
+  }
+
+  thead { background: rgba(255,255,255,0.04); }
+
+  th {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-weight: 600;
+  }
+
+  td {
+    padding: 0.55rem 1rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+  }
+
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .rarity-common   { color: #b0bec5; }
+  .rarity-rare     { color: #64b5f6; }
+  .rarity-epic     { color: #ce93d8; }
+  .rarity-legendary{ color: #ffd54f; }
+  .rarity-champion { color: #ef9a9a; }
+
+  .gold-cost { color: var(--gold); font-weight: 600; }
+
+  /* Tier timeline */
+  .tier-timeline { display: flex; flex-direction: column; }
+
+  .tier-row { display: flex; align-items: stretch; }
+
+  .tier-spine {
+    display: flex; flex-direction: column; align-items: center;
+    width: 32px; flex-shrink: 0;
+  }
+
+  .tier-dot {
+    width: 13px; height: 13px; border-radius: 50%;
+    border: 2px solid var(--border); background: var(--dark);
+    flex-shrink: 0; margin-top: 1rem; z-index: 1;
+  }
+  .tier-dot.done   { background: var(--green); border-color: var(--green); box-shadow: 0 0 6px rgba(62,207,106,0.5); }
+  .tier-dot.active { background: var(--gold);  border-color: var(--gold);  box-shadow: 0 0 10px rgba(245,200,66,0.7); }
+
+  .tier-line { width: 2px; flex: 1; background: var(--border); min-height: 6px; }
+  .tier-line.done { background: rgba(62,207,106,0.35); }
+
+  .tier-body {
+    flex: 1; padding: 0.6rem 0.75rem; border-radius: 10px;
+    margin: 0.25rem 0 0.25rem 0.5rem; border: 1px solid transparent;
+  }
+  .tier-body.done   { background: rgba(62,207,106,0.03); border-color: rgba(62,207,106,0.1); }
+  .tier-body.active { background: rgba(245,200,66,0.06); border-color: rgba(245,200,66,0.4); box-shadow: 0 0 16px rgba(245,200,66,0.06); }
+  .tier-body.future { opacity: 0.55; }
+
+  .tier-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
+
+  .tier-cl-range {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+  }
+  .tier-cl-range.done   { color: var(--green); }
+  .tier-cl-range.active { color: var(--gold); }
+  .tier-cl-range.future { color: var(--dim); }
+
+  .tier-rewards-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem; font-weight: 600; color: var(--text);
+  }
+  .tier-body.future .tier-rewards-text { color: var(--dim); }
+
+  .tier-status-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 0.2rem 0.6rem;
+    border-radius: 100px; white-space: nowrap; flex-shrink: 0;
+  }
+  .tier-status-badge.done   { background: rgba(62,207,106,0.15); color: var(--green); border: 1px solid rgba(62,207,106,0.3); }
+  .tier-status-badge.active { background: rgba(245,200,66,0.15); color: var(--gold);  border: 1px solid rgba(245,200,66,0.4); }
+  .tier-status-badge.future { color: var(--dim); border: 1px solid var(--border); }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    margin-top: 4rem;
+    font-size: 0.75rem;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+  }
+
+  footer a { color: var(--dim); }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    .player-hero { flex-direction: column; text-align: center; }
+    .cl-number { font-size: 2.8rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="crown">👑</div>
+    <h1>Collection Level</h1>
+    <p class="subtitle">Clash Royale · May 2026 Update</p>
+  </header>
+
+  <div class="search-box">
+    <div class="search-row">
+      <input class="tag-input" id="tagInput" type="text"
+             placeholder="e.g. #ABC123 or ABC123" maxlength="12"
+             autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="btn btn-primary" id="searchBtn" onclick="lookup()">
+        ⚔ Look Up
+      </button>
+    </div>
+    <p style="margin-top:0.65rem;font-size:0.78rem;color:var(--dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:0.05em;">
+      Enter your player tag — the # is optional.
+      Find it in-game by tapping your name on your profile.
+    </p>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Fetching player data…</p>
+  </div>
+
+  <div id="results"></div>
+
+</div>
+
+<footer>
+  Not affiliated with Supercell &nbsp;·&nbsp;
+  Data from <a href="https://developer.clashroyale.com" target="_blank">Clash Royale API</a>
+</footer>
+
+<script>
+const tagInput = document.getElementById('tagInput');
+
+tagInput.addEventListener('keydown', e => { if (e.key === 'Enter') lookup(); });
+
+function fmt(n) { return n.toLocaleString(); }
+
+function rarityClass(r) {
+  return 'rarity-' + (r || 'common').toLowerCase();
+}
+
+function tierEmoji(t) {
+  if (!t) return '🎁';
+
+  const cl = t.min;
+
+  if (cl >= 2001) return '💎';
+  if (cl >= 1801) return '👑';
+  if (cl >= 1401) return '⭐';
+
+  return '🎁';
+}
+
+function buildRewardsText(tier) {
+  if (!tier) return '';
+  const parts = [
+    `${fmt(tier.gems)} 💎`,
+    `${tier.chests}x 5★ Chest${tier.chests > 1 ? 's' : ''}`,
+  ];
+  if (tier.banners) parts.push(`${tier.banners} Banner${tier.banners > 1 ? 's' : ''}`);
+  if (tier.tower_skin) parts.push('Tower Skin 🏆');
+  return parts.join(' · ');
+}
+
+async function lookup() {
+  let tag = tagInput.value.trim().toUpperCase();
+  if (!tag) return;
+  if (!tag.startsWith('#')) tag = '#' + tag;
+
+  document.getElementById('errorBox').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('searchBtn').disabled = true;
+
+  try {
+    const resp = await fetch(`/api/player/${encodeURIComponent(tag)}`);
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(data.error || `HTTP ${resp.status}`);
+    }
+
+    render(data);
+    document.getElementById('results').style.display = 'block';
+  } catch (err) {
+    const box = document.getElementById('errorBox');
+    box.textContent = `❌ ${err.message}`;
+    box.style.display = 'block';
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('searchBtn').disabled = false;
+  }
+}
+
+function render(d) {
+  const cl = d.collection_level;
+  const el = document.getElementById('results');
+
+  el.innerHTML = `
+    <!-- Player hero -->
+    <div class="player-hero">
+      <div class="player-info">
+        <div class="player-name">${escHtml(d.name)}</div>
+        <div class="player-tag">${escHtml(d.tag)}</div>
+      </div>
+      <div class="cl-display">
+        <div class="cl-number">${fmt(cl)}</div>
+        <div class="cl-label">Collection Level</div>
+      </div>
+    </div>
+
+    <!-- Stats grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🃏</div>
+        <div class="stat-value">${d.cards_total}</div>
+        <div class="stat-label">Cards</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">${d.cards_maxed}</div>
+        <div class="stat-label">Maxed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-value">${d.evolutions}</div>
+        <div class="stat-label">Evos + Heroes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⬆️</div>
+        <div class="stat-value">${fmt(d.upgrades_left)}</div>
+        <div class="stat-label">Upgrades Left</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value">${d.next_milestone}</div>
+        <div class="stat-label">Next Milestone</div>
+      </div>
+    </div>
+
+    <!-- Celebration tiers -->
+    <div class="section-title">Release Day Reward Tiers</div>
+    ${buildTierTimeline(d.all_tiers, cl)}
+
+    <!-- Milestone targets -->
+    <div class="section-title">Reward Targets</div>
+    <div class="milestone-list">
+      ${getTargetList(d, cl).map(t => buildMilestone(d, t, cl)).join('')}
+    </div>
+  `;
+
+  // Animate progress bars
+  requestAnimationFrame(() => {
+    el.querySelectorAll('.progress-fill[data-pct]').forEach(bar => {
+      bar.style.width = bar.dataset.pct + '%';
+    });
+  });
+
+  // Wire up plan toggles
+  el.querySelectorAll('.plan-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wrap = btn.nextElementSibling;
+      const open = wrap.style.display === 'block';
+      wrap.style.display = open ? 'none' : 'block';
+      btn.querySelector('.arrow').textContent = open ? '▾' : '▴';
+    });
+  });
+}
+
+function getTargetList(d, cl) {
+  const fixedTargets = [1401, 1801, 2001];
+
+  const targets = [
+    d.next_tier_target,
+    ...fixedTargets,
+  ]
+    .map(t => Number(t))
+    .filter(t => Number.isFinite(t) && t > cl);
+
+  return [...new Set(targets)];
+}
+
+function getMilestoneLabel(target, d) {
+  const labelMap = {
+    1401: '⭐ 2x 5★ Chest Tier',
+    1801: '👑 3x 5★ Chest Tier',
+    2001: '💎 3x 5★ Chests + Tower Skin',
+  };
+
+  if (labelMap[target]) {
+    return labelMap[target];
+  }
+
+  const tier = (d.all_tiers || []).find(t => Number(t.min) === Number(target));
+
+  if (tier) {
+    return `${tierEmoji(tier)} Next Tier · ${buildRewardsText(tier)}`;
+  }
+
+  return '🎯 Next Tier';
+}
+
+function buildMilestone(d, target, cl) {
+  const plan = d.plans ? d.plans[String(target)] : null;
+  const label = getMilestoneLabel(target, d);
+
+  return buildMilestoneFromPlan(target, cl, plan, label);
+}
+
+function buildMilestoneFromPlan(target, cl, plan, label) {
+  const reached = cl >= target;
+  const pct = Math.min(100, Math.round((cl / target) * 100));
+
+  let tableHtml = '';
+
+  if (!reached && plan && plan.plan && plan.plan.length > 0) {
+    tableHtml = `
+      <p style="margin-top:0.6rem;font-size:0.75rem;color:var(--dim);font-family:'Barlow Condensed',sans-serif;">
+        💡 Cheapest gold path to this target — copy gaps show how many cards or wildcards you may need.
+      </p>
+      <button class="plan-toggle">
+        <span class="arrow">▾</span> Show cost-ranked upgrade path (${fmt(plan.total_gold)} gold)
+      </button>
+      <div class="plan-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Card</th>
+              <th>Rarity</th>
+              <th>Level</th>
+              <th>Upgrades</th>
+              <th>Copies</th>
+              <th>Gold</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${plan.plan.map(p => `
+              <tr>
+                <td>${escHtml(p.name)}</td>
+                <td class="${rarityClass(p.rarity)}">${capitalize(p.rarity)}</td>
+                <td>${p.from_level} → ${p.to_level}</td>
+                <td>+${p.upgrades}</td>
+                <td>
+                  ${fmt(p.copies_owned || 0)} / ${fmt(p.copies_needed || 0)}
+                  ${(p.wildcards_or_extra_needed || 0) > 0
+                    ? `<span style="color:#f8c66a;"> · need ${fmt(p.wildcards_or_extra_needed)} wild/extra</span>`
+                    : `<span style="color:var(--green);"> · ready</span>`}
+                </td>
+                <td class="gold-cost">${fmt(p.gold)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    if (plan.shortfall > 0) {
+      tableHtml += `<p style="margin-top:.5rem;font-size:.8rem;color:#f88;">
+        ⚠ ${plan.shortfall} upgrades still needed even after maxing all current cards — you may need more Evolutions, Heroes, or newly released cards.
+      </p>`;
+    }
+  }
+
+  return `
+    <div class="milestone-item ${reached ? 'reached' : ''}">
+      <div class="milestone-top">
+        <div class="milestone-name">CL ${fmt(target)} &nbsp;·&nbsp; ${label}</div>
+        ${reached
+          ? '<span class="badge badge-green">✓ Reached</span>'
+          : `<span class="badge badge-gold">Need ${fmt(target - cl)}</span>`}
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill ${reached ? 'reached-fill' : ''}"
+               data-pct="${pct}" style="width:0"></div>
+        </div>
+        <div class="progress-meta">
+          <span>${fmt(cl)} / ${fmt(target)}</span>
+          <span>${pct}%</span>
+        </div>
+      </div>
+      ${!reached && plan && !plan.already_reached ? tableHtml : ''}
+    </div>
+  `;
+}
+
+function buildTierTimeline(tiers, cl) {
+  if (!tiers || !tiers.length) return '';
+  return `<div class="tier-timeline">` + tiers.map((t, i) => {
+    const done   = cl > t.max;
+    const active = cl >= t.min && cl <= t.max;
+    const future = cl < t.min;
+    const state  = done ? 'done' : active ? 'active' : 'future';
+    const isLast = i === tiers.length - 1;
+
+    const statusLabel = done
+      ? '✓ Passed'
+      : active
+      ? '← You are here'
+      : `Need ${fmt(t.min - cl)} more`;
+
+    return `
+      <div class="tier-row">
+        <div class="tier-spine">
+          <div class="tier-dot ${state}"></div>
+          ${!isLast ? `<div class="tier-line ${done ? 'done' : ''}"></div>` : ''}
+        </div>
+        <div class="tier-body ${state}">
+          <div class="tier-header">
+            <div>
+              <div class="tier-cl-range ${state}">CL ${t.label || `${fmt(t.min)} – ${fmt(t.max)}`}</div>
+              <div class="tier-rewards-text">${tierEmoji(t)} ${buildRewardsText(t)}</div>
+            </div>
+            <span class="tier-status-badge ${state}">${statusLabel}</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('') + `</div>`;
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+</script>
+</body>
+</html>
