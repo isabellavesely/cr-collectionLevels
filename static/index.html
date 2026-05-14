@@ -670,14 +670,15 @@ function rarityClass(r) {
 }
 
 function tierEmoji(t) {
-  if (!t) return '🏆';
+  if (!t) return '🎁';
+
   const cl = t.min;
+
   if (cl >= 2001) return '💎';
   if (cl >= 1801) return '👑';
-  if (cl >= 1401) return '🥇';
-  if (cl >= 1001) return '🥈';
-  if (cl >= 601)  return '🥉';
-  return '⚔️';
+  if (cl >= 1401) return '⭐';
+
+  return '🎁';
 }
 
 function buildRewardsText(tier) {
@@ -811,8 +812,8 @@ function getTargetList(d, cl) {
 
 function getMilestoneLabel(target, d) {
   const labelMap = {
-    1401: '🥇 2x 5★ Chest Tier',
-    1801: '🏆 3x 5★ Chest Tier',
+    1401: '⭐ 2x 5★ Chest Tier',
+    1801: '👑 3x 5★ Chest Tier',
     2001: '💎 3x 5★ Chests + Tower Skin',
   };
 
