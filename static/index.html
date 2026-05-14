@@ -663,6 +663,16 @@ const tagInput = document.getElementById('tagInput');
 
 tagInput.addEventListener('keydown', e => { if (e.key === 'Enter') lookup(); });
 
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const tag = params.get('tag');
+
+  if (tag) {
+    tagInput.value = tag;
+    lookup();
+  }
+});
+
 function fmt(n) { return n.toLocaleString(); }
 
 function rarityClass(r) {
@@ -696,6 +706,10 @@ async function lookup() {
   let tag = tagInput.value.trim().toUpperCase();
   if (!tag) return;
   if (!tag.startsWith('#')) tag = '#' + tag;
+  
+  const shareUrl = new URL(window.location.href);
+  shareUrl.searchParams.set('tag', tag.replace('#', ''));
+  history.replaceState(null, '', shareUrl.toString());
 
   document.getElementById('errorBox').style.display = 'none';
   document.getElementById('results').style.display = 'none';
