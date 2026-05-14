@@ -1,18 +1,7 @@
 """
 Clash Royale Collection Level — Flask Backend
 =============================================
-Proxies requests to the official CR API so:
-  - Your API key stays secret on the server
-  - Friends can use the web UI without any setup
-  - CORS issues are avoided
-
-Setup:
-    pip install flask requests
-    export CR_API_KEY="your_full_token_here"
-    python app.py
-
-Then open http://localhost:5000 in your browser and share the link
-(or deploy to Render/Railway for a public URL your friends can visit).
+Proxies requests to the official CR API.
 """
 
 import os
